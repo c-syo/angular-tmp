@@ -18,6 +18,7 @@ export class AppComponent {
   user: User = {
     uid: "hogehoge@hoge.com",
     email: "hogehoge@hoge.com",
+    password: "hogehoge",
     name: "hogehoge",
     gid: ["hoge"],
     photoURL: "hoge",
@@ -26,6 +27,7 @@ export class AppComponent {
   user2: User = {
     uid: "hoge@hoge.com",
     email: "hoge@hoge.com",
+    password: "hoge",
     name: "hoge",
     gid: ["hoge"],
     photoURL: "hoge",
@@ -44,7 +46,10 @@ export class AppComponent {
     // this.service
     //   .getUserData(this.user)
     //   .subscribe(result => (this.user2 = result));
-
-    this.users = this.service.getUsersData(0);
+    this.service
+      // .login("hoge@hoge.com", "hoge")
+      .getUserData(this.user2)
+      .subscribe(res => (this.user = res));
+    this.user.name = "aaa";
   }
 }

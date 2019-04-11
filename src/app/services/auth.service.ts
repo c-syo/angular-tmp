@@ -20,6 +20,7 @@ export class AuthService {
   nullUserData: User = {
     uid: "",
     email: "",
+    password: "",
     name: "",
     gid: [""],
     photoURL: "",
@@ -40,12 +41,30 @@ export class AuthService {
   */
 
   login(email: string, password: string): Observable<User> {
-    return this.afAuth.auth
-      .signInWithEmailAndPassword(email, password)
-      .then(user => {
-        return this.updateUserData(user);
-      })
-      .catch(err => console.log(err));
+    // return this.afAuth.auth
+    //   .signInWithEmailAndPassword(email, password)
+    //   .then(user => {
+    //     return this.updateUserData(user);
+    //   })
+    //   .catch(err => console.log(err));
+    const data: User = {
+      uid: email,
+      email: email,
+      password: password,
+      name: this.nullUserData.name,
+      gid: this.nullUserData.gid,
+      photoURL: this.nullUserData.photoURL,
+      nomi: this.nullUserData.nomi
+    };
+    this.getUserData(data).subscribe(res => {
+      if (res) {
+        if (res.password == data.password) {
+          this.user = res;
+        }
+      }
+      this.user = this.nullUserData;
+    });
+    return of(this.user);
   }
   /*
   logout() {
@@ -54,10 +73,10 @@ export class AuthService {
     });
   } */
   public createUserData(user: User) {
-    // this.afStore.collection("items").doc(user.uid);
     const data: User = {
       uid: user.uid,
       email: user.email,
+      password: user.password,
       name: user.name || "",
       gid: user.gid || [""],
       photoURL: user.photoURL || "",
@@ -69,6 +88,7 @@ export class AuthService {
     const data: User = {
       uid: user.uid,
       email: user.email,
+      password: user.password,
       name: user.name || "",
       gid: user.gid || [""],
       photoURL: user.photoURL || "",
@@ -78,31 +98,21 @@ export class AuthService {
   }
   public getUserData(user: User) {
     this.afStore
-      .doc(`items/${user.uid}`)
+      .doc<User>(`items/${user.uid}`)
       .valueChanges()
       .subscribe(result => {
         if (result) {
-          return result;
+          this.user = result;
         } else {
-          return of(this.nullUserData);
+          this.user = this.nullUserData;
         }
       });
-    return of(this.nullUserData);
+    return of(this.user);
   }
   public getUsersData(nomi: number) {
-    // this.users=[];
-    // this.afStore.collection("items", ref => ref.where("nomi", "==", nomi))
-    //   .snapshotChanges().subscribe(snapshots=>{
-    //     this.users.push(snapshots.map(snapshot=>{
-    //       return user = snapshot.payload.doc.data;
-    //     }));
-    //   });
     return this.afStore
-      .collection<User>("items") //, ref => ref.where("nomi", "==", nomi))
+      .collection<User>("items", ref => ref.where("nomi", "==", nomi))
       .valueChanges();
-    // .subscribe(results => {
-    //   this.users = this.users.concat(this.users, results);
-    // });
   }
   public setAfStore(afStore: AngularFirestore) {
     this.afStore = afStore;
